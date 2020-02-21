@@ -1,63 +1,63 @@
 variables:
-  sku: "TSK{{rand_str(9,9)}}"
+  sku: "TSK{{rand_str(9)}}"
   name: "Test SKU {{sku}}"
-  endpoint: "{{getenv('ENDPOINT')}}"
+  endpoint: "{{website()}}"
   customer: "{{getenv('CUSTOMER')}}"
-requests:
-  - createItem:
-      method: POST
-      url: "{{endpoint}}/v1.0/items/api"
-      body:
-        customerCode: "{{customer}}"
-        sku: "{{sku}}"
-        upc: "{{sku}}"
-        name: "Test SKU {{sku}}"
+template:
+  createItem:
+    method: POST
+    url: "{{endpoint}}/v1.0/items/api"
+    body:
+      customerCode: "{{customer}}"
+      sku: "{{sku}}"
+      upc: "{{sku}}"
+      name: "Test SKU {{sku}}"
+      itemUnit: Each
+      length: 5
+      width: 3
+      height: 2
+      weight: 15
+      altUnit: Carton
+      altUPC: TESTUPC18-2
+      altQuantity: 16
+      altLength: 10
+      altWidth: 12
+      altHeight: 4
+      altWeight: 240
+    code: 200
+    response:
+      status: Creating
+  updateItem:
+    waitFor:
+      - azureServiceBus: items
+    url: "{{endpoint}}/v1.0/items/api/{{from_response('createItem', 'id')}}"
+    method: PUT
+    body:
+      customerCode: "{{customer}}"
+      sku: "{{sku}}"
+      upc: "{{sku}}"
+      name: "Test SKU {{sku}}"
+      itemUnit: Each
+      length: 3
+      width: 4
+      height: 4
+      weight: 10
+    response:
+      result:
         itemUnit: Each
-        length: 5
-        width: 3
-        height: 2
-        weight: 15
-        altUnit: Carton
-        altUPC: TESTUPC18-2
-        altQuantity: 16
-        altLength: 10
-        altWidth: 12
-        altHeight: 4
-        altWeight: 240
-      code: 200
-      response:
-        status: Creating
-  - updateItem:
-      waitFor:
-        - azureServiceBus: items
-      url: "{{endpoint}}/v1.0/items/api/{{from_response('createItem', 'id')}}"
-      method: PUT
-      body:
-        customerCode: "{{customer}}"
-        sku: "{{sku}}"
-        upc: "{{sku}}"
-        name: "Test SKU {{sku}}"
-        itemUnit: Each
+        kitType: Component
         length: 4
         width: 4
         height: 4
         weight: 10
-      response:
-        result:
-          itemUnit: Each
-          kitType: Component
-          length: 4
-          width: 4
-          height: 4
-          weight: 10
-          lengthUnit: Inch
-          weightUnit: Pound
-          status: Enabled
-          altUnit:
-          altUPC:
-          altQuantity:
-          altLength:
-          altWidth:
-          altHeight:
-          altWeight:
-      code: 200
+        lengthUnit: Inch
+        weightUnit: Pound
+        status: Enabled
+        altUnit:
+        altUPC:
+        altQuantity:
+        altLength:
+        altWidth:
+        altHeight:
+        altWeight:
+    code: 200

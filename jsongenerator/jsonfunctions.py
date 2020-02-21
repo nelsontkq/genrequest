@@ -14,4 +14,12 @@ def rand_str(length):
 
 
 def getenv(input_str, default=None):
-    os.getenv(input_str, default)
+    return os.getenv(input_str, default)
+
+
+def from_response(val, id):
+    return 32
+
+
+def website():
+    return "www.stuburl.com/blah"
