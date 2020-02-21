@@ -33,7 +33,7 @@ class OutputType(Enum):
     # XML = 3
 
 
-class TagReplacer:
+class Generator:
     def _set_functions(self, custom_functions=None):
         if custom_functions:
             if not isinstance(custom_functions, list):
@@ -158,14 +158,4 @@ class TagReplacer:
                     )
             results.append(self._convert_to_target_type(yaml.load(result, Loader=yaml.Loader), output_type))
         return results
-
-
-class JsonGenerator:
-    def __init__(self, custom_functions=None, **kwargs):
-
-        pass
-
-
-def create_generator(input_json) -> JsonGenerator:
-    pass
 
