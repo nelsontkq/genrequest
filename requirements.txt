@@ -1,2 +1,2 @@
-ruamel.yaml
-# dicttoxml==1.7.4
+ruamel.yaml==0.16.10
+Faker==4.0.1

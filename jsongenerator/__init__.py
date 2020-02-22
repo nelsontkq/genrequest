@@ -1,2 +1,1 @@
-import jsonfunctions
-import jsongenerator
+from jsongenerator.jsongenerator import Generator

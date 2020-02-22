@@ -1,10 +1,10 @@
-from jsongenerator.jsongenerator import TagReplacer
+from jsongenerator.jsongenerator import Generator
 import time
 import os
 
 
 def test_parse_variables_doesnt_lose_type():
-    x = TagReplacer()
+    x = Generator()
     assert x.parse_variables("10")[0][0] == 10
     assert x.parse_variables("'10'")[0][0] == '10'
     assert x.parse_variables("False")[0][0] == False
@@ -17,15 +17,15 @@ def test_parse_variables_doesnt_lose_type():
     assert x.parse_variables("key=13.42")[1]['key'] == 13.42
 
 def test_parse_function_generates_different_every_time():
-    x = TagReplacer()
-    func = x._parse_function("{{rand_str(10)}}")
-    assert str(func) != str(func)
+    x = Generator()
+    func = x._parse_function("{{address()}}")
+    assert func() != func()
 
 
 def test_generate():
     os.environ["ENDPOINT"] = "www.endpoint.com"
     os.environ["CUSTOMER"] = "Customer1"
-    x = TagReplacer()
+    x = Generator()
     with open("tests/item-update-removes-alt-units.yaml") as yaml:
         x.load_template(yaml.read())
     results = x.generate(k=3)
@@ -36,8 +36,8 @@ def test_generate():
 def test_generates_quick_enough():
     """ Should never take longer than ~100ms per body."""
     then = time.time()
-    x = TagReplacer()
-    k = 200
+    x = Generator()
+    k = 20
     with open("tests/item-update-removes-alt-units.yaml") as yaml:
         x.load_template(yaml.read())
     for result in x.generate(k=k):

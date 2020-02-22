@@ -1,29 +1,27 @@
 import re
 import json
 import inspect
+from faker import Faker
 from enum import Enum
 from ruamel import yaml
-import jsonfunctions
-# import dicttoxml
+from string import ascii_uppercase, digits
+import os
+from uuid import uuid4
+from faker.providers import BaseProvider
 import json
 
 
-class FunctionRunner:
-    def __init__(self, function, variables):
-        self._function = function
-        if variables:
-            self._args, self._kwargs = variables
-        else:
-            self._args = []
-            self._kwargs = {}
+class GeneratorProvider(BaseProvider):
+    def getenv(self, input_str, default=None):
+        return os.getenv(input_str, default)
 
-    def __str__(self):
-        res = self._function(*self._args, **self._kwargs)
-        if res is None:
-            raise ValueError(
-                f"None was returned from function '{self._function.__name__}' with args {self._args} and kwargs {self._kwargs}."
-            )
-        return str(res)
+    def from_response(self, val, id):
+        return 32
+
+    def random_string(self, length):
+        return "".join(
+            self.random_choices(elements=tuple(ascii_uppercase + digits), length=length)
+        )
 
 
 class OutputType(Enum):
@@ -34,15 +32,6 @@ class OutputType(Enum):
 
 
 class Generator:
-    def _set_functions(self, custom_functions=None):
-        if custom_functions:
-            if not isinstance(custom_functions, list):
-                raise ValueError("custom_functions should be a list of functions!")
-            for func in custom_functions:
-                self.add_function(func)
-        for _, func in inspect.getmembers(jsonfunctions, inspect.isfunction):
-            self.add_function(func)
-
     def _convert_to_target_type(self, unconverted: dict, output_type=None):
         output_type = output_type or self.output_type
         if output_type == OutputType.JSON:
@@ -64,37 +53,32 @@ class Generator:
     def set_output(self, value: OutputType):
         self._output_type = value
 
-    @property
-    def functions(self):
-        """ A dictionary of [function_name] = function
-        """
-        return self._functions
-
-    def __init__(self, custom_functions=None, read_format="yaml", write_format="json", output_type=OutputType.JSON):
+    def __init__(
+        self, custom_generator=None, write_format="json", output_type=OutputType.JSON
+    ):
         self._write_format = write_format
         self._output_type = output_type
-        self._read_format = read_format
-        self._functions = {}
         self._template = []
-        self._set_functions(custom_functions)
-
-    def pop_function(self, value):
-        if value in self._functions:
-            return self._functions.pop(value)
-
-    def add_function(self, value):
-        if not callable(value):
-            raise ValueError(f"Functions must be callable! provided: {value}")
-        if value.__name__ in self._functions:
-            raise ValueError(f"A function called {value.__name__} is already defined!")
-        self._functions[value.__name__] = value
+        self._fake = Faker()
+        if custom_generator:
+            self._fake.add_provider(custom_generator)
+        else:
+            self._fake.add_provider(GeneratorProvider)
 
     def _parse_function(self, input_str: str):
         left, right = re.search(r"{{\s*(\w+)\((.*?)\)", input_str).groups()
-        variables = self.parse_variables(right)
-        if left not in self._functions:
-            raise ValueError(f"A function called {left} was not defined!")
-        return FunctionRunner(self._functions[left], variables)
+
+        func = getattr(self._fake, left)
+        if not func:
+            raise ValueError(f"A function called {left} was not defined in provider!")
+        if right:
+            arr, dic = self.parse_variables(right)
+
+            def get_it():
+                return func(*arr, **dic)
+
+            return get_it
+        return func
 
     @classmethod
     def parse_variables(cls, input_str: str):
@@ -141,12 +125,18 @@ class Generator:
             else:
                 self._template.append(item)
 
+    def _handle_record(self, item):
+        if callable(item):
+            return str(item())
+        return str(item)
+
     def generate(self, k=1, with_variables=True, output_type=None):
         """ Generate k json bodies using the provided template
         """
         results = []
         for _ in range(k):
-            result = "".join(map(str, self._template))
+
+            result = "".join(map(self._handle_record, self._template))
             if with_variables:
                 body = yaml.load(result, Loader=yaml.Loader)
                 variables = body.get("variables", {})
@@ -156,6 +146,10 @@ class Generator:
                         lambda m: variables.get(m.group(1), m.group(0)),
                         result,
                     )
-            results.append(self._convert_to_target_type(yaml.load(result, Loader=yaml.Loader), output_type))
+            results.append(
+                self._convert_to_target_type(
+                    yaml.load(result, Loader=yaml.Loader).get("template"), output_type
+                )
+            )
         return results
 

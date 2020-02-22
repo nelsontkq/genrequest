@@ -1,12 +1,12 @@
 variables:
-  sku: "TSK{{rand_str(9)}}"
+  sku: "TSK{{random_string(9)}}"
   name: "Test SKU {{sku}}"
-  endpoint: "{{website()}}"
+  endpoint: "{{url()}}"
   customer: "{{getenv('CUSTOMER')}}"
 template:
   createItem:
     method: POST
-    url: "{{endpoint}}/v1.0/items/api"
+    url: "{{endpoint}}items"
     body:
       customerCode: "{{customer}}"
       sku: "{{sku}}"
