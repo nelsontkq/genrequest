@@ -20,7 +20,8 @@ class GeneratorProvider(BaseProvider):
 
     def random_string(self, length):
         return "".join(
-            self.random_choices(elements=tuple(ascii_uppercase + digits), length=length)
+            self.random_choices(elements=tuple(
+                ascii_uppercase + digits), length=length)
         )
 
 
@@ -70,7 +71,8 @@ class Generator:
 
         func = getattr(self._fake, left)
         if not func:
-            raise ValueError(f"A function called {left} was not defined in provider!")
+            raise ValueError(
+                f"A function called {left} was not defined in provider!")
         if right:
             arr, dic = self.parse_variables(right)
 
@@ -119,6 +121,7 @@ class Generator:
     def load_template(self, input_str: str):
         """ Load a template into an array for easy generation of multiple requests.
         """
+        self._template = []
         for item in re.split(r"({{.*?}})", input_str):
             if item.startswith("{{") and "(" in item:
                 self._template.append(self._parse_function(item))
@@ -148,8 +151,8 @@ class Generator:
                     )
             results.append(
                 self._convert_to_target_type(
-                    yaml.load(result, Loader=yaml.Loader).get("template"), output_type
+                    yaml.load(result, Loader=yaml.Loader).get(
+                        "template"), output_type
                 )
             )
         return results
-
