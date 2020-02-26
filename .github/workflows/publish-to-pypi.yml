@@ -6,7 +6,6 @@ jobs:
     name: Build and publish to PyPI and TestPyPI
     runs-on: ubuntu-18.04
   steps:
-    - uses: actions/checkout@master
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
@@ -17,8 +16,9 @@ jobs:
         setup.py
         sdist
         bdist_wheel
-    - name: Publish distribution 📦 to PyPI
-      if: startsWith(github.event.ref, 'refs/tags')
+    - name: Publish package
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
+        user: __token__
         password: ${{ secrets.pypi_password }}
