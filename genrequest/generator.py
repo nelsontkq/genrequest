@@ -31,7 +31,6 @@ class OutputType(Enum):
     YAML = 0
     JSON = 1
     DICT = 2
-    # XML = 3
 
 
 class Generator:
@@ -45,8 +44,7 @@ class Generator:
             return unconverted
         if output_type == OutputType.YAML:
             return yaml.dump(unconverted)
-        # elif self.output_type == OutputType.XML:
-        #     return dicttoxml.dicttoxml(unconverted, custom_root="template")
+        return None
 
     @property
     def output_type(self):
