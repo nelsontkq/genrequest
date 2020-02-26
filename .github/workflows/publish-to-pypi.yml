@@ -25,6 +25,9 @@ jobs:
           pip install pytest
           pytest tests
           - name: Set up Python
+  publish:
+    runs-on: ubuntu-latest
+    steps:
       - name: Publish package
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@master
