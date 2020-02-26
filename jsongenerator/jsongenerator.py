@@ -16,9 +16,6 @@ class GeneratorProvider(BaseProvider):
     def getenv(self, input_str, default=None):
         return os.getenv(input_str, default)
 
-    def from_response(self, val, id):
-        return 32
-
     def random_string(self, length):
         return "".join(
             self.random_choices(elements=tuple(
@@ -63,7 +60,11 @@ class Generator:
         self._fake = Faker()
         self._fake.add_provider(GeneratorProvider)
         if custom_generator:
-            self._fake.add_provider(custom_generator)
+            if isinstance(custom_generator, list):
+                for i in custom_generator:
+                    self._fake.add_provider(i)
+            else:
+                self._fake.add_provider(custom_generator)
 
     def _parse_function(self, input_str: str):
         left, right = re.search(r"{{\s*(\w+)\((.*?)\)", input_str).groups()
