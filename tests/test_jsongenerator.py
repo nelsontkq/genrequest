@@ -20,6 +20,8 @@ def test_parse_function_generates_different_every_time():
     x = Generator()
     func = x._parse_function("{{address()}}")
     assert func() != func()
+    func = x._parse_function("{{random_string(4)}}")
+    assert func() != func()
 
 
 def test_generate():
@@ -40,9 +42,9 @@ def test_generates_quick_enough():
     k = 20
     with open("tests/item-update-removes-alt-units.yaml") as yaml:
         x.load_template(yaml.read())
-    for result in x.generate(k=k):
-        pass
+    list(x.generate(k=k))
     now = time.time()
 
+    print(f"{now - then} seconds average for 20")
     assert now - then < k / 10
 

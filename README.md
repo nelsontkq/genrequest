@@ -25,35 +25,12 @@ template:
     weight: 15
 ```
 
-or use json
+Then you can generate json like so
 
-```json
-{
-  "variables": {
-    "name": "{{name()}}",
-    "endpoint": "{{url()}}",
-    "user": "{{getenv('USER_NAME')}}"
-  },
-  "template": {
-    "url": "{{endpoint}}/v1.0/items",
-    "userName": "{{user}}",
-    "userId": "{{user}}_{{random_string(7)}}",
-    "name": "{{name}}",
-    "description": "{{sentence()}}",
-    "address": "{{address()}}",
-    "dimensions": {
-      "length": 5,
-      "width": 3,
-      "height": 2,
-      "weight": 15
-    }
-  }
-}
-```
-
-This will output json like so:
-
-```json
+```python
+g = Generator()
+g.load_template(yaml_or_json_input)
+g.generate()
 {
   "url": "https://www.black-soto.net//v1.0/items",
   "userName": "USER12331",
@@ -63,4 +40,9 @@ This will output json like so:
   "address": "184 Davis Square Dominguezside, IL 37051",
   "dimensions": { "length": 5, "width": 3, "height": 2, "weight": 15 }
 }
+g.generate(k=100)
+# An array of 100 generated bodies are yielded
 ```
+
+## Custom Generators
+Text is generated using [faker](https://github.com/joke2k/faker) and you can pass in your own function provider to the generator.

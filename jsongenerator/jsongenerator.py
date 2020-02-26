@@ -8,6 +8,7 @@ from string import ascii_uppercase, digits
 import os
 from uuid import uuid4
 from faker.providers import BaseProvider
+import functools
 import json
 
 
@@ -55,16 +56,14 @@ class Generator:
         self._output_type = value
 
     def __init__(
-        self, custom_generator=None, write_format="json", output_type=OutputType.JSON
+        self, custom_generator=None, output_type=OutputType.JSON
     ):
-        self._write_format = write_format
         self._output_type = output_type
         self._template = []
         self._fake = Faker()
+        self._fake.add_provider(GeneratorProvider)
         if custom_generator:
             self._fake.add_provider(custom_generator)
-        else:
-            self._fake.add_provider(GeneratorProvider)
 
     def _parse_function(self, input_str: str):
         left, right = re.search(r"{{\s*(\w+)\((.*?)\)", input_str).groups()
@@ -75,11 +74,7 @@ class Generator:
                 f"A function called {left} was not defined in provider!")
         if right:
             arr, dic = self.parse_variables(right)
-
-            def get_it():
-                return func(*arr, **dic)
-
-            return get_it
+            return functools.partial(func, *arr, **dic)
         return func
 
     @classmethod
@@ -87,7 +82,6 @@ class Generator:
         """ Parse the variables provided to the method in the json. """
         output = []
         key_vals = {}
-        template = []
 
         def parse_sub(val):
             if (
@@ -136,7 +130,6 @@ class Generator:
     def generate(self, k=1, with_variables=True, output_type=None):
         """ Generate k json bodies using the provided template
         """
-        results = []
         for _ in range(k):
 
             result = "".join(map(self._handle_record, self._template))
@@ -149,10 +142,7 @@ class Generator:
                         lambda m: variables.get(m.group(1), m.group(0)),
                         result,
                     )
-            results.append(
-                self._convert_to_target_type(
-                    yaml.load(result, Loader=yaml.Loader).get(
-                        "template"), output_type
-                )
+            yield self._convert_to_target_type(
+                yaml.load(result, Loader=yaml.Loader).get(
+                    "template"), output_type
             )
-        return results
