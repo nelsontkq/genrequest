@@ -40,9 +40,8 @@ g.generate()
   "address": "184 Davis Square Dominguezside, IL 37051",
   "dimensions": { "length": 5, "width": 3, "height": 2, "weight": 15 }
 }
-g.generate(k=100)
-# An array of 100 generated bodies are yielded
 ```
 
 ## Custom Generators
+
 Text is generated using [faker](https://github.com/joke2k/faker) and you can pass in your own function provider to the generator.
