@@ -30,7 +30,7 @@ template:
   updateItem:
     waitFor:
       - azureServiceBus: items
-    url: "{{endpoint}}/v1.0/items/api/{{from_response('createItem', 'id')}}"
+    url: "{{endpoint}}v1.0/items"
     method: PUT
     body:
       customerCode: "{{customer}}"
