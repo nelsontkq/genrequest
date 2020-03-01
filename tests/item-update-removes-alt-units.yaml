@@ -4,7 +4,7 @@ variables:
   endpoint: "{{url()}}"
   customer: "{{getenv('CUSTOMER')}}"
 template:
-  createItem:
+  - name: createItem
     method: POST
     url: "{{endpoint}}items"
     body:
@@ -24,12 +24,13 @@ template:
       altWidth: 12
       altHeight: 4
       altWeight: 240
-    code: 200
-    response:
-      status: Creating
-  updateItem:
+    statusCode: 200
+    checks:
+      - "status == 'Creating'"
+  - name: updateItem
     waitFor:
-      - azureServiceBus: items
+      azureServiceBus:
+        - items
     url: "{{endpoint}}v1.0/items"
     method: PUT
     body:
@@ -42,22 +43,20 @@ template:
       width: 4
       height: 4
       weight: 10
-    response:
-      result:
-        itemUnit: Each
-        kitType: Component
-        length: 4
-        width: 4
-        height: 4
-        weight: 10
-        lengthUnit: Inch
-        weightUnit: Pound
-        status: Enabled
-        altUnit:
-        altUPC:
-        altQuantity:
-        altLength:
-        altWidth:
-        altHeight:
-        altWeight:
-    code: 200
+    statusCode: 200
+    checks:
+      - result.itemUnit == 'Each'
+      - result.kitType == 'Component'
+      - result.length == 4
+      - result.height == 4
+      - result.weight == 10
+      - result.lengthUnit == 'Inch'
+      - result.weightUnit == 'Pound'
+      - result.status == 'Enabled'
+      - result.altUnit == null
+      - result.altUPC == null
+      - result.altQuantity == null
+      - result.altLength == null
+      - result.altWidth == null
+      - result.altHeight == null
+      - result.altWeight == null
