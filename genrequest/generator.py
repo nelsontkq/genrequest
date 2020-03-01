@@ -56,17 +56,17 @@ class Generator:
     def set_output(self, value: OutputType):
         self._output_type = value
 
-    def __init__(self, custom_generator=None, output_type=OutputType.JSON):
+    def __init__(self, provider=None, output_type=OutputType.JSON):
         self._output_type = output_type
         self._template = []
         self._fake = Faker()
         self._fake.add_provider(GeneratorProvider)
-        if custom_generator:
-            if isinstance(custom_generator, list):
-                for i in custom_generator:
+        if provider:
+            if isinstance(provider, list):
+                for i in provider:
                     self._fake.add_provider(i)
             else:
-                self._fake.add_provider(custom_generator)
+                self._fake.add_provider(provider)
 
     def _parse_function(self, input_str: str):
         left, right = re.search(r"{{\s*(\w+)\((.*?)\)", input_str).groups()
